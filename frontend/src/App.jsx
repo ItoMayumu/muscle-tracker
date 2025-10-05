@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./style.css";
+import Graph from "./components/Graph";
 
 export default function App() {
   const [activeExercise, setActiveExercise] = useState(null);
@@ -38,9 +39,9 @@ export default function App() {
         )}
 
         {activeTab === "history" && (
-          <div className="placeholder">
-            <p>📋 記録一覧（ここに履歴を表示予定）</p>
-          </div>
+        <div>
+          <Graph/>
+        </div>
         )}
 
         {activeTab === "settings" && (
