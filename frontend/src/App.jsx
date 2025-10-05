@@ -2,6 +2,8 @@ import { useState } from "react";
 import "./style.css";
 import Graph from "./components/Graph";
 
+const API_URL = "https://muscle-tracker.onrender.com";
+
 export default function App() {
   const [activeExercise, setActiveExercise] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
@@ -15,10 +17,38 @@ export default function App() {
   const openForm = (name) => setActiveExercise(name);
   const closeForm = () => setActiveExercise(null);
 
-  const handleSubmit = (e) => {
+  // ✨ RenderのAPIにデータを送信する修正版
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`${activeExercise}を記録しました！`);
-    closeForm();
+
+    const form = e.target;
+    const newWorkout = {
+      date: new Date().toISOString().split("T")[0],
+      exercise: activeExercise,
+      weight: parseFloat(form[0].value),
+      reps: parseInt(form[1].value),
+      sets: parseInt(form[2].value),
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/api/workouts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newWorkout),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        alert(`${data.exercise}（${data.weight}kg × ${data.reps}回 × ${data.sets}セット）を記録しました！`);
+        closeForm();
+      } else {
+        const err = await res.json();
+        alert("保存に失敗しました: " + (err.error || "不明なエラー"));
+      }
+    } catch (err) {
+      alert("サーバーに接続できませんでした");
+      console.error(err);
+    }
   };
 
   return (
@@ -28,6 +58,7 @@ export default function App() {
       </header>
 
       <main>
+        {/* ホーム（種目グリッド） */}
         {activeTab === "home" && (
           <div className="exercise-grid">
             {exercises.map((name, i) => (
@@ -38,12 +69,14 @@ export default function App() {
           </div>
         )}
 
+        {/* 記録ページ（グラフ） */}
         {activeTab === "history" && (
-        <div>
-          <Graph/>
-        </div>
+          <div>
+            <Graph />
+          </div>
         )}
 
+        {/* 設定ページ */}
         {activeTab === "settings" && (
           <div className="placeholder">
             <p>⚙️ 設定メニュー（テーマなど）</p>
@@ -51,7 +84,7 @@ export default function App() {
         )}
       </main>
 
-      {/* フッター */}
+      {/* フッター（タブ切り替え） */}
       <footer className="bottom-nav">
         <button
           className={activeTab === "home" ? "active" : ""}
@@ -73,7 +106,7 @@ export default function App() {
         </button>
       </footer>
 
-      {/* 入力フォーム */}
+      {/* 入力フォーム（ポップアップ） */}
       {activeExercise && (
         <>
           <div className="overlay" onClick={closeForm}></div>
