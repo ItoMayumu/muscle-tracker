@@ -10,7 +10,8 @@ import {
   ResponsiveContainer
 } from "recharts";
 
-const API_URL = "https://muscle-tracker-api.onrender.com";
+const API_URL = "https://muscle-tracker.onrender.com";
+
 
 export default function Graph() {
   const [data, setData] = useState([]);
